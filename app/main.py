@@ -1,7 +1,9 @@
 import time
 import logging
+import os
 from typing import List, Any
 from fastapi import FastAPI, status
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from app.schemas import ChatRequest, ChatResponse, Recommendation
 from app.agent.guardrails import check_guardrails
@@ -46,6 +48,15 @@ def health_check():
     Health check endpoint. Must respond even on cold start with 200 OK.
     """
     return {"status": "ok"}
+
+@app.get("/")
+def read_index():
+    """
+    Serve the interactive web UI at the root path.
+    """
+    static_file_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
+    return FileResponse(static_file_path)
+
 
 
 @app.post("/chat", response_model=ChatResponse, status_code=status.HTTP_200_OK)
