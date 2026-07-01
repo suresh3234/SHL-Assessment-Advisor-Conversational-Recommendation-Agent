@@ -34,6 +34,7 @@ We established a rigorous local evaluation suite to measure improvements:
 1. *LLM-Driven Flow Control*: Initially, we let the LLM decide when to recommend or clarify. This led to conversational drift, infinite clarification loops, and turn-cap violations. **Solution**: Moved all flow control to a pure Python state machine.
 2. *Stateless Intent Latency*: Evaluating intent on the entire transcript caused the agent to get stuck in a previous turn's intent (e.g., continuing to compare after the user said *"Thanks"*). **Solution**: Updated slot extraction to determine intent based on the latest user message while accumulating slots from the entire history.
 3. *Model Cold Starts*: Loading the embedding model on the first request caused it to exceed the 30-second timeout. **Solution**: Added an `@app.on_event("startup")` handler to warm up the model and index, keeping subsequent requests under 50ms.
+4. *Docker Memory Overheads (OOM)*: Default PyTorch installs massive CUDA/GPU binaries causing container RAM usage to exceed Render's 512MB limit. **Solution**: Updated the `Dockerfile` to install CPU-only PyTorch, limited worker threads, and set `MALLOC_ARENA_MAX=2` to restrict memory usage under 250MB.
 
 ---
 
@@ -42,4 +43,4 @@ We used **Antigravity** (Google DeepMind's agentic coding assistant) for:
 - Writing the hybrid search index and index-building scripts.
 - Refining regex patterns for guardrails and slot extraction.
 - Implementing the pytest suite and the turn-by-turn simulation harness.
-- Creating the Dockerfile and deployment configurations.
+- Optimizing the Dockerfile and memory configuration for container deployment.
